@@ -1,8 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using Shiko.ChatProvider.API.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+var connectionString = builder.Configuration.GetConnectionString("SqlStorage");
+
+// register DbContext
+builder.Services.AddDbContext<ChatDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
