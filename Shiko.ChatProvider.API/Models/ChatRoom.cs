@@ -1,6 +1,6 @@
 ﻿namespace Shiko.ChatProvider.API.Models;
 
-public class ChatRoomEntity
+public class ChatRoom
 {
     public Guid Id { get; set; }
 

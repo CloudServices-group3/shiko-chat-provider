@@ -5,14 +5,15 @@ namespace Shiko.ChatProvider.API.Data;
 
 public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(options)
 {
-    public DbSet<ChatRoomEntity> ChatRooms => Set<ChatRoomEntity>();
+    public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
+    public DbSet<UserAcsIdentity> UserAcsIdentities => Set<UserAcsIdentity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Configuration
-        modelBuilder.Entity<ChatRoomEntity>(builder =>
+        modelBuilder.Entity<ChatRoom>(builder =>
         {
             builder.ToTable("ChatRooms");
 
@@ -31,6 +32,25 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(
             builder.Property(x => x.Created)
                 .HasDefaultValueSql("GETUTCDATE()");
          
+        });
+
+        modelBuilder.Entity<UserAcsIdentity>(builder =>
+        {
+            builder.ToTable("UserAcsIdentities");
+
+            builder.HasKey(x => x.Id).HasName("PK_UserAcsIdentities_Id");
+
+            builder.Property(x => x.Id)
+                .HasDefaultValueSql("NEWID()");
+
+            builder.Property(x => x.UserId)
+                .IsRequired();
+
+            builder.Property(x => x.AcsUserId)
+                .IsRequired();
+
+            builder.Property(x => x.Created)
+                .HasDefaultValueSql("GETUTCDATE()");
         });
     }
 }
