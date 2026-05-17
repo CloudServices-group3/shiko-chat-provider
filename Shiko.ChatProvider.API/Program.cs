@@ -1,8 +1,10 @@
 
 using Azure;
+using Azure.Communication.Chat;
 using Azure.Communication.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shiko.ChatProvider.API.Data;
+using Shiko.ChatProvider.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +16,7 @@ var acsConnectionString = builder.Configuration["AzureCommunicationServices:Conn
 var endpoint = new Uri(builder.Configuration["AzureCommunicationServices:Endpoint"]!);
 var key = new AzureKeyCredential(builder.Configuration["AzureCommunicationServices:AccessKey"]!);
 
-
-builder.Services.AddSingleton(new CommunicationIdentityClient(acsConnectionString!));
-
-builder.Services.AddSingleton(endpoint);
+builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
 
 builder.Services.AddOpenApi();
 

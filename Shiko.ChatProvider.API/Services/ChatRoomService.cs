@@ -1,51 +1,54 @@
-﻿using Azure.Communication.Chat;
+﻿using Azure.Communication;
+using Azure.Communication.Chat;
 using Azure.Communication.Identity;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Shiko.ChatProvider.API.Data;
 using Shiko.ChatProvider.API.Dtos;
 using Shiko.ChatProvider.API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Shiko.ChatProvider.API.Services;
 
-public class ChatRoomService : IChatRoomService
+
+public class ChatRoomService(ChatDbContext context, IConfiguration config) : IChatRoomService
 {
-    private readonly ChatClient _chatClient;
-    private readonly ChatDbContext _context;
-    private readonly CommunicationIdentityClient _identityClient;
-    private readonly string _acsEndpoint;
+    // initialize the CommunicationIdentityClient for creating users and tokens
+    private readonly CommunicationIdentityClient _identityClient = new(
+        config.GetConnectionString("AzureCommunicationServices")
+        ?? throw new ArgumentNullException("Cannot find connection string for ACS")
+    );
 
-    public ChatRoomService(ChatClient chatClient, ChatDbContext context, IConfiguration config)
-    {
-        _chatClient = chatClient;
-        _context = context;
+    private readonly string _acsEndpoint = config["AzureCommunicationServices:Endpoint"]
+        ?? throw new InvalidOperationException("ACS Endpoint is missing.");
 
-        // get connection string to create IdentityClient for token generation
-        var connectionString = config.GetConnectionString("AzureCommunicationServices")
-            ?? throw new ArgumentNullException("Cannot find connection string for Azure Communication Services");
-
-        _identityClient = new CommunicationIdentityClient(connectionString);
-
-        // get URL from endpoint in connection string
-        _acsEndpoint = connectionString.Split(';')[0].Replace("endpoint=", "");
-    }
 
     /// <summary>
-    ///Get chat room from db.  If not existing, create a new thread in Azure and save it in db.
+    /// Fetches an existing chat room from the database, or creates a new one in Azure and db if missing.
     /// </summary>
     public async Task<ChatRoomDto> GetOrCreateChatRoomAsync(Guid courseId)
     {
-        // Check if chat room alread exists for the course 
-        var chatRoomEntity = await _context.ChatRooms
+
+        // check if a chat room already exists for the given courseId
+        var chatRoomEntity = await context.ChatRooms
             .FirstOrDefaultAsync(x => x.CourseId == courseId);
 
-        // If chat room doesn't exist (Lazy Creation)
+        // lazy creation, only create a new chat thread in Azure and a new record in db if there isn't one already for the course
         if (chatRoomEntity == null)
         {
-            // call Azure SDK to create new chat thread and get threadId
-            var createChatThreadResult = await _chatClient.CreateChatThreadAsync(topic: $"Chat for Course {courseId}");
+            // create a temporary identity in Azure to authorize the ChatClient
+            var identityResponse = await _identityClient.CreateUserAndTokenAsync(scopes: [CommunicationTokenScope.Chat]);
+
+            // package the token into a credential object required by Azure SDK
+            var credential = new CommunicationTokenCredential(identityResponse.Value.AccessToken.Token);
+
+            // create a chat client with the credential and endpoint
+            var chatClient = new ChatClient(new Uri(_acsEndpoint), credential);
+
+            // request Azure to create a new chat thread and get the thread id
+            var createChatThreadResult = await chatClient.CreateChatThreadAsync(topic: $"Chat for Course {courseId}");
             var azureThreadId = createChatThreadResult.Value.ChatThread.Id;
 
-            // create entity and save to db
+            // create entity to map the course to the newly created Azure Thread ID
             chatRoomEntity = new ChatRoom
             {
                 Id = Guid.NewGuid(),
@@ -54,11 +57,10 @@ public class ChatRoomService : IChatRoomService
                 Created = DateTime.UtcNow
             };
 
-            _context.ChatRooms.Add(chatRoomEntity);
-            await _context.SaveChangesAsync();
+            context.ChatRooms.Add(chatRoomEntity);
+            await context.SaveChangesAsync();
         }
 
-        // map to DTO and return
         return new ChatRoomDto
         {
             Id = chatRoomEntity.Id,
@@ -67,9 +69,9 @@ public class ChatRoomService : IChatRoomService
             Created = chatRoomEntity.Created
         };
     }
-
     /// <summary>
-    /// Creates a unique Azure-identity and a time-limited token for the user.
+    /// Creates a unique Azure-identity and a time-limited token. 
+    /// Used by the frontend to a allow a user to connect to the Azure Chat Thread. 
     /// </summary>
     public async Task<AcsTokenDto> GetOrCreateAcsTokenAsync(string userId)
     {
