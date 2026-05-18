@@ -1,6 +1,7 @@
 @Shiko.ChatProvider.API_HostAddress = http://localhost:5229
 
-GET {{Shiko.ChatProvider.API_HostAddress}}/weatherforecast/
+### Testa att ansluta till chatten
+POST {{Shiko.ChatProvider.API_HostAddress}}/api/chat/join/11111111-2222-3333-4444-555555555555?userId=Nette
 Accept: application/json
 
 ###

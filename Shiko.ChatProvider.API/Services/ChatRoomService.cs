@@ -14,8 +14,8 @@ public class ChatRoomService(ChatDbContext context, IConfiguration config) : ICh
 {
     // initialize the CommunicationIdentityClient for creating users and tokens
     private readonly CommunicationIdentityClient _identityClient = new(
-        config.GetConnectionString("AzureCommunicationServices")
-        ?? throw new ArgumentNullException("Cannot find connection string for ACS")
+        config["AzureCommunicationServices:ConnectionString"]
+           ?? throw new ArgumentNullException("Cannot find connection string for ACS")
     );
 
     private readonly string _acsEndpoint = config["AzureCommunicationServices:Endpoint"]
@@ -45,7 +45,10 @@ public class ChatRoomService(ChatDbContext context, IConfiguration config) : ICh
             var chatClient = new ChatClient(new Uri(_acsEndpoint), credential);
 
             // request Azure to create a new chat thread and get the thread id
-            var createChatThreadResult = await chatClient.CreateChatThreadAsync(topic: $"Chat for Course {courseId}");
+            var createChatThreadResult = await chatClient.CreateChatThreadAsync(
+    topic: $"Chat for Course {courseId}",
+    participants: [] // empty list of participants
+);
             var azureThreadId = createChatThreadResult.Value.ChatThread.Id;
 
             // create entity to map the course to the newly created Azure Thread ID
