@@ -24,8 +24,4 @@
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Endpoints\" />
-  </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
 ﻿namespace Shiko.ChatProvider.API.Dtos;
 
-public class AcsTokenDto
+public record AcsTokenDto
 {
     // user id from auth
     public string UserId { get; set; } = null!;
