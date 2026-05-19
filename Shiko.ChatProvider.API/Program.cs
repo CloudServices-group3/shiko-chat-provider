@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shiko.ChatProvider.API.Data;
 using Shiko.ChatProvider.API.Endpoints;
 using Shiko.ChatProvider.API.Middleware;
+using Shiko.ChatProvider.API.Security;
 using Shiko.ChatProvider.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ var endpoint = new Uri(builder.Configuration["AzureCommunicationServices:Endpoin
 var key = new AzureKeyCredential(builder.Configuration["AzureCommunicationServices:AccessKey"]!);
 
 builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -37,6 +40,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+
 app.UseExceptionHandler();
 
 app.MapChatEndpoints();

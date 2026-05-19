@@ -9,7 +9,8 @@ public static class ChatEndpoints
     {
         var group = app.MapGroup("/api/chat")
             .WithName("JoinChatRoom")
-            .WithSummary("Joins a chat room for a specific course and returns ACS credentials");
+            .WithSummary("Joins a chat room for a specific course and returns ACS credentials")
+            .RequireAuthorization();
 
         group.MapPost("/join/{courseId}", JoinChat);
          
