@@ -25,7 +25,7 @@ public class ChatRoomService(ChatDbContext context, IConfiguration config) : ICh
     /// <summary>
     /// Fetches an existing chat room from the database, or creates a new one in Azure and db if missing.
     /// </summary>
-    public async Task<ChatRoomDto> GetOrCreateChatRoomAsync(Guid courseId)
+    public async Task<ChatRoomDto> GetOrCreateChatRoomAsync(Guid courseId, string acsUserId, string username)
     {
 
         // check if a chat room already exists for the given courseId
@@ -44,11 +44,16 @@ public class ChatRoomService(ChatDbContext context, IConfiguration config) : ICh
             // create a chat client with the credential and endpoint
             var chatClient = new ChatClient(new Uri(_acsEndpoint), credential);
 
+            var firstParticipant = new ChatParticipant(new CommunicationUserIdentifier(acsUserId))
+            {
+                DisplayName = username
+            };
+
             // request Azure to create a new chat thread and get the thread id
             var createChatThreadResult = await chatClient.CreateChatThreadAsync(
-    topic: $"Chat for Course {courseId}",
-    participants: [] // empty list of participants
-);
+                    topic: $"Chat for Course {courseId}",
+                    participants: [firstParticipant] 
+                );
             var azureThreadId = createChatThreadResult.Value.ChatThread.Id;
 
             // create entity to map the course to the newly created Azure Thread ID

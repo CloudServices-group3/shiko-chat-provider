@@ -31,6 +31,19 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+//CORS options to allow requests from Next.js frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowNextJS",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000") 
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); 
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -40,6 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowNextJS");
 
 app.UseAuthentication();
 app.UseAuthorization();
