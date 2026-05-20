@@ -19,11 +19,19 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x' # Hämta senaste stabila .NET 10 SDK
-
+        
     - name: Publish application
-      run: dotnet publish Shiko.ChatProvider.API/Shiko.ChatProvider.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      run: dotnet publish Shiko.ChatProvider.API/Shiko.ChatProvider.API.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: 'azure-chat-webap-id-b3d0'
+        tenant-id: 'eda98058-f525-48ea-8580-a5197c25e0d5'
+        subscription-id: 'eda98058-f525-48ea-8580-a5197c25e0d5'
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: 'azure-chat-webapp'
+        package: "${{env.DOTNET_ROOT}}/myapp"
