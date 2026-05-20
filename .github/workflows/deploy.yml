@@ -27,7 +27,7 @@ jobs:
       uses: azure/login@v2
       with:
         client-id: 'azure-chat-webap-id-b3d0'
-        tenant-id: 'eda98058-f525-48ea-8580-a5197c25e0d5'
+        tenant-id: 'academediase.onmicrosoft.com'
         subscription-id: 'eda98058-f525-48ea-8580-a5197c25e0d5'
 
     - name: Deploy to Azure Web App
