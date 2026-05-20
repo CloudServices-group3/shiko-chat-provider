@@ -1,0 +1,29 @@
+name: Build and Deploy to Azure
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' # Hämta senaste stabila .NET 10 SDK
+
+    - name: Publish application
+      run: dotnet publish Shiko.ChatProvider.API/Shiko.ChatProvider.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'azure-chat-webapp'
