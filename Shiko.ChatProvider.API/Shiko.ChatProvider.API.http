@@ -1,7 +1,16 @@
-@Shiko.ChatProvider.API_HostAddress = http://localhost:5229
+@Shiko.ChatProvider.API_HostAddress = https://localhost:7164
 
-### Testa att ansluta till chatten
-POST {{Shiko.ChatProvider.API_HostAddress}}/api/chat/join/11111111-2222-3333-4444-555555555555?userId=Nette
-Accept: application/json
+### Hämta token från auth-API
+POST https://shiko-auth-api-2.azurewebsites.net/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@domain.com",
+    "password": "BytMig!123"
+}
 
 ###
+
+POST {{Shiko.ChatProvider.API_HostAddress}}/api/chat/join/3fa85f64-5717-4562-b3fc-2c963f66afa6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzODc4YWZhNC0zNDA1LTQwYjItYWU4OC03MTlkMGZiNmZkNjciLCJqdGkiOiI1YTRlMWI5Zi1lZjcyLTQzNGQtOWYwMC01MzQyNTU4NmU1OGYiLCJ1c2VySWQiOiIzODc4YWZhNC0zNDA1LTQwYjItYWU4OC03MTlkMGZiNmZkNjciLCJlbWFpbCI6InRlc3RAZG9tYWluLmNvbSIsIm5iZiI6MTc3OTU5NzYyNywiZXhwIjoxNzc5NTk4MjI3LCJpc3MiOiJhdXRoLWFwaSIsImF1ZCI6Im1pY3Jvc2VydmljZXMifQ.J-kKtFZzktR8LPVprP2F_VpvE9nFx7qRrt-vLHEazDc
+Content-Type: application/json

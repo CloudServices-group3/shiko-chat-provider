@@ -23,25 +23,46 @@ public static class JwtConfiguration
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+
+                ValidateAudience = true,
+                ValidAudience = audience,
+
+                ValidateIssuerSigningKey = true,
+                //convert signinkey from text to byte array
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+
+                options.Events = new JwtBearerEvents
                 {
-                    ValidateIssuer = true,
-                    ValidIssuer = issuer,
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"Auth failed: {context.Exception.Message}");
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("Token validated successfully!");
+                        return Task.CompletedTask;
+                    }
 
-                    ValidateAudience = true,
-                    ValidAudience = audience,
 
-                    ValidateIssuerSigningKey = true,
-                    //convert signinkey from text to byte array
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
-
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
                 };
+
             });
+
+
 
         services.AddAuthorization();
 
         return services;
     }
+
+
 }

@@ -1,5 +1,7 @@
 ﻿using Shiko.ChatProvider.API.Dtos;
 using Shiko.ChatProvider.API.Services;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace Shiko.ChatProvider.API.Endpoints;
 
@@ -9,18 +11,28 @@ public static class ChatEndpoints
     {
         var group = app.MapGroup("/api/chat")
             .WithName("JoinChatRoom")
-            .WithSummary("Joins a chat room for a specific course and returns ACS credentials");
-           // .RequireAuthorization();
+            .WithSummary("Joins a chat room for a specific course and returns ACS credentials")
+            .RequireAuthorization();
 
         group.MapPost("/join/{courseId}", JoinChat);
          
     }
 
     // method to enter chat (POST /api/chat/join/{courseId})
-    static async Task<IResult> JoinChat(Guid courseId, string userId, IChatRoomService chatService)
-    { try
+    static async Task<IResult> JoinChat(Guid courseId, HttpContext httpContext, IChatRoomService chatService)
+    {
+        try {
+
+            // get user id from claims in jwt-token
+            var userId = httpContext.User.FindFirst("userId")?.Value
+                      ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? httpContext.User.FindFirst("sub")?.Value;
+
+        if (userId is null)
         {
-            var tokenData = await chatService.GetOrCreateAcsTokenAsync(userId);
+            return Results.Unauthorized();
+        }
+        var tokenData = await chatService.GetOrCreateAcsTokenAsync(userId);
 
             var room = await chatService.GetOrCreateChatRoomAsync(courseId, tokenData.AcsUserId, userId);
 

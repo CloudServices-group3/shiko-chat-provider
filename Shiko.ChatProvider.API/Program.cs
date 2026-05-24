@@ -9,6 +9,26 @@ using Shiko.ChatProvider.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+// Kolla att SigningKey faktiskt läses in
+var signingKey = builder.Configuration["Jwt:SigningKey"];
+if (string.IsNullOrEmpty(signingKey))
+    throw new InvalidOperationException("SigningKey is empty!");
+
+Console.WriteLine($"=== JWT CONFIG ===");
+Console.WriteLine($"Issuer: '{builder.Configuration["Jwt:Issuer"]}'");
+Console.WriteLine($"Audience: '{builder.Configuration["Jwt:Audience"]}'");
+Console.WriteLine($"SigningKey length: {builder.Configuration["Jwt:SigningKey"]?.Length}");
+Console.WriteLine($"==================");
+
+
 // connection strings
 var connectionString = builder.Configuration.GetConnectionString("SqlStorage");
 var acsConnectionString = builder.Configuration["AzureCommunicationServices:ConnectionString"];
@@ -44,9 +64,15 @@ builder.Services.AddCors(options =>
         });
 });
 
+
+
+
+
 var app = builder.Build();
 
 app.MapOpenApi();
+
+app.UseDeveloperExceptionPage();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
