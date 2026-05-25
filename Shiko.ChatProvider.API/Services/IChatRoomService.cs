@@ -4,11 +4,19 @@ namespace Shiko.ChatProvider.API.Services;
 
 public interface IChatRoomService
 {
-    // Create a new chat room for a course if it doesn't exist, otherwise return the existing one
+    /// <summary>
+    /// Get already existing or create a new chat room for the given course.
+    /// Also ensures that the user is added as a participant to the thread using the Admin client.
+    /// </summary>
     Task<ChatRoomDto> GetOrCreateChatRoomAsync(Guid courseId, string acsUserId, string username);
 
-   
+    /// <summary>
+    /// Create ACS identity for the user. 
+    /// </summary>
+    Task<string> CreateAcsIdentityAsync();
 
-    // Get or create an ACS identity for a user + return the token
-    Task<AcsTokenDto> GetOrCreateAcsTokenAsync(string userId);
+    /// <summary>
+    /// Generate a new ACS token for the given user. This is used when the user joins the chat to ensure they have a valid token.
+    /// </summary>
+    Task<AcsTokenDto> GenerateChatTokenAsync(string appUserId, string existingAcsUserId);
 }

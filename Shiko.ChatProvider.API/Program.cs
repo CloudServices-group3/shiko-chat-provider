@@ -9,13 +9,15 @@ using Shiko.ChatProvider.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddEnvironmentVariables();
 
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
 }
+
+builder.Configuration.AddEnvironmentVariables();
+
 
 // Kolla att SigningKey faktiskt läses in
 var signingKey = builder.Configuration["Jwt:SigningKey"];
