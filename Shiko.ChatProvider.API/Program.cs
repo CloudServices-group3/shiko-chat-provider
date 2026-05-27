@@ -19,7 +19,7 @@ if (builder.Environment.IsDevelopment())
 builder.Configuration.AddEnvironmentVariables();
 
 
-// Kolla att SigningKey faktiskt läses in
+// check signinkey
 var signingKey = builder.Configuration["Jwt:SigningKey"];
 if (string.IsNullOrEmpty(signingKey))
     throw new InvalidOperationException("SigningKey is empty!");
@@ -65,9 +65,6 @@ builder.Services.AddCors(options =>
                   .AllowCredentials(); 
         });
 });
-
-
-
 
 
 var app = builder.Build();
