@@ -7,6 +7,6 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        // Tom nu eftersom vi inte sparar chattrådar eller ACS-användare i DB längre
+        // keeping this in case there is time to modify chat to integrate db
     }
 }
