@@ -29,10 +29,8 @@ public class ChatRoomService : IChatRoomService
         );
     }
 
-    // =========================================================
-    // SETUP - Run ONCE to create admin user and global thread
-    // Call GET /setup, save the result in appsettings
-    // =========================================================
+    // SETUP method to create admin user and global thread. Not needed after initial setup.
+
     //public async Task<object> SetupGlobalChatAsync()
     //{
     //    try
@@ -68,9 +66,9 @@ public class ChatRoomService : IChatRoomService
     //        throw;
     //    }
     //}
-    // =========================================================
-    // JOIN - Called every time a user wants to join the chat
-    // =========================================================
+
+    // method to Joind existing global chat, called every time a user wants to join
+   
     public async Task<ChatRoomResponseDto> JoinGlobalChatAsync(string username)
     {
         // Read config values

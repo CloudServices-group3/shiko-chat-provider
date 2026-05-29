@@ -6,10 +6,9 @@ using Shiko.ChatProvider.API.Endpoints;
 using Shiko.ChatProvider.API.Middleware;
 using Shiko.ChatProvider.API.Security;
 using Shiko.ChatProvider.API.Services;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 if (builder.Environment.IsDevelopment())
 {
@@ -23,13 +22,6 @@ builder.Configuration.AddEnvironmentVariables();
 var signingKey = builder.Configuration["Jwt:SigningKey"];
 if (string.IsNullOrEmpty(signingKey))
     throw new InvalidOperationException("SigningKey is empty!");
-
-Console.WriteLine($"=== JWT CONFIG ===");
-Console.WriteLine($"Issuer: '{builder.Configuration["Jwt:Issuer"]}'");
-Console.WriteLine($"Audience: '{builder.Configuration["Jwt:Audience"]}'");
-Console.WriteLine($"SigningKey length: {builder.Configuration["Jwt:SigningKey"]?.Length}");
-Console.WriteLine($"==================");
-
 
 // connection strings
 var connectionString = builder.Configuration.GetConnectionString("SqlStorage");
@@ -53,7 +45,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-//CORS options to allow requests from Next.js frontend
+//CORS options to allow requests from Next.js frontend - add deployed frontend URL in production
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJS",
@@ -76,7 +68,8 @@ app.UseDeveloperExceptionPage();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-  
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -85,7 +78,6 @@ app.UseCors("AllowNextJS");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.UseExceptionHandler();
 
