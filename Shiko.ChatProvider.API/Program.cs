@@ -19,17 +19,15 @@ builder.Configuration.AddEnvironmentVariables();
 
 
 // check signinkey
-var signingKey = builder.Configuration["Jwt:SigningKey"];
-if (string.IsNullOrEmpty(signingKey))
-    throw new InvalidOperationException("SigningKey is empty!");
+var signingKey = builder.Configuration["Jwt:SigningKey"]
+   ?? throw new InvalidOperationException("SigningKey is missing!");
 
 // connection strings
-var connectionString = builder.Configuration.GetConnectionString("SqlStorage");
-var acsConnectionString = builder.Configuration["AzureCommunicationServices:ConnectionString"];
+var connectionString = builder.Configuration.GetConnectionString("SqlStorage")
+  ?? throw new InvalidOperationException("SQL connection string is missing!");
 
-// ASC endpoint and key
-var endpoint = new Uri(builder.Configuration["AzureCommunicationServices:Endpoint"]!);
-var key = new AzureKeyCredential(builder.Configuration["AzureCommunicationServices:AccessKey"]!);
+var acsConnectionString = builder.Configuration["AzureCommunicationServices:ConnectionString"]
+  ?? throw new InvalidOperationException("ACS connection string is missing!");
 
 builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
 

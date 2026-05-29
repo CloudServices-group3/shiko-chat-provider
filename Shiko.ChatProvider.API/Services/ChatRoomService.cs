@@ -10,7 +10,7 @@ using Shiko.ChatProvider.API.Models;
 
 namespace Shiko.ChatProvider.API.Services;
 
-public class ChatRoomService : IChatRoomService
+public class ChatRoomService  : IChatRoomService
 {
     private readonly IConfiguration _config;
     private readonly string _acsEndpoint;
@@ -67,8 +67,8 @@ public class ChatRoomService : IChatRoomService
     //    }
     //}
 
-    // method to Joind existing global chat, called every time a user wants to join
-   
+  
+    /// <inheritdoc />
     public async Task<ChatRoomResponseDto> JoinGlobalChatAsync(string username)
     {
         // Read config values
@@ -78,7 +78,7 @@ public class ChatRoomService : IChatRoomService
         string adminUserId = _config["AzureCommunicationServices:AdminUserId"]
             ?? throw new InvalidOperationException("AdminUserId missing in config.");
 
-        // 1. Create a new ACS identity + token for this user session
+        // Create a new ACS identity + token for this user session
         var newUser = await _identityClient.CreateUserAsync();
         var userToken = await _identityClient.GetTokenAsync(
             newUser.Value,

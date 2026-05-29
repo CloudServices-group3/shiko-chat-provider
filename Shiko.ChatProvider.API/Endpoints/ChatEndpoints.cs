@@ -1,4 +1,5 @@
 ﻿
+using Shiko.ChatProvider.API.Models;
 using Shiko.ChatProvider.API.Services;
 using System.Security.Claims;
 
@@ -15,10 +16,14 @@ namespace Shiko.ChatProvider.API.Endpoints;
            .RequireAuthorization(); 
 
         group.MapPost("/join/{courseId}", JoinChat)
-             .WithName("JoinChatRoom");
-        
-    }
+             .WithName("JoinChatRoom")
+             .WithDescription("Creates a unique session token for Azure Communication " +
+             "Services (ACS) and adding user to global chat thread")
+             .Produces<ChatRoomResponseDto>(StatusCodes.Status200OK)
+             .Produces(StatusCodes.Status401Unauthorized)
+             .Produces(StatusCodes.Status500InternalServerError);
 
+    }
 
     private static async Task<IResult> JoinChat(
             Guid courseId,
@@ -26,8 +31,8 @@ namespace Shiko.ChatProvider.API.Endpoints;
             IChatRoomService chatService)
         {
             try
-            {     
-                var username = httpContext.User.FindFirst("email")?.Value
+        {     // get user email from JWT-token in frontend request, if not found, use "Class mate" as default username
+            var username = httpContext.User.FindFirst("email")?.Value
                   ?? httpContext.User.FindFirst(ClaimTypes.Email)?.Value
                   ?? "Class mate";
 
