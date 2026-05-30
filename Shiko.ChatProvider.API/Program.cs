@@ -59,25 +59,26 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.MapOpenApi();
+app.UseExceptionHandler();
 
 app.UseDeveloperExceptionPage();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseCors("AllowNextJS");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseExceptionHandler();
+
+app.MapOpenApi();
+
+app.MapScalarApiReference(options =>
+{
+    options.Title = "Chat Provider API";
+    options.WithTheme(ScalarTheme.Mars);
+    options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
 
 app.MapChatEndpoints();
 

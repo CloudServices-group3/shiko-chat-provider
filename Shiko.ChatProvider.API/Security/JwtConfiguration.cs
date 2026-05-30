@@ -57,12 +57,7 @@ public static class JwtConfiguration
 
             });
 
-
-
         services.AddAuthorization();
-
         return services;
     }
-
-
 }

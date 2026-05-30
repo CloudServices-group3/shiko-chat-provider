@@ -3,9 +3,7 @@ using Shiko.ChatProvider.API.Models;
 using Shiko.ChatProvider.API.Services;
 using System.Security.Claims;
 
-
 namespace Shiko.ChatProvider.API.Endpoints;
-
 
 public static class ChatEndpoints
 {

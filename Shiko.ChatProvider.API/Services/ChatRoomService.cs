@@ -5,7 +5,6 @@ using Azure.Communication.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Shiko.ChatProvider.API.Data;
-using Shiko.ChatProvider.API.Dtos;
 using Shiko.ChatProvider.API.Models;
 
 namespace Shiko.ChatProvider.API.Services;
