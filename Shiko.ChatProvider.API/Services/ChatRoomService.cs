@@ -10,24 +10,16 @@ using Shiko.ChatProvider.API.Models;
 
 namespace Shiko.ChatProvider.API.Services;
 
-public class ChatRoomService  : IChatRoomService
+public class ChatRoomService (IConfiguration config, ILogger <ChatRoomService> logger)  : IChatRoomService
 {
-    private readonly IConfiguration _config;
-    private readonly string _acsEndpoint;
-    private readonly CommunicationIdentityClient _identityClient;
+    private readonly string _acsEndpoint = config["AzureCommunicationServices:Endpoint"]
+        ?? throw new InvalidOperationException("ACS endpoint missing.");
 
-    public ChatRoomService(IConfiguration config)
-    {
-        _config = config;
+    private readonly CommunicationIdentityClient _identityClient = new CommunicationIdentityClient(
+        config["AzureCommunicationServices:ConnectionString"]
+        ?? throw new InvalidOperationException("ACS connection string missing.")
 
-        _acsEndpoint = config["AzureCommunicationServices:Endpoint"]
-            ?? throw new InvalidOperationException("ACS endpoint missing.");
-
-        _identityClient = new CommunicationIdentityClient(
-            config["AzureCommunicationServices:ConnectionString"]
-            ?? throw new InvalidOperationException("ACS connection string missing.")
         );
-    }
 
     // SETUP method to create admin user and global thread. Not needed after initial setup.
 
@@ -67,15 +59,15 @@ public class ChatRoomService  : IChatRoomService
     //    }
     //}
 
-  
+
     /// <inheritdoc />
     public async Task<ChatRoomResponseDto> JoinGlobalChatAsync(string username)
     {
-        // Read config values
-        string globalThreadId = _config["AzureCommunicationServices:GlobalThreadId"]
+        // Read config values - global thread id and admin user id created with initial method and added to env variables
+        string globalThreadId = config["AzureCommunicationServices:GlobalThreadId"]
             ?? throw new InvalidOperationException("GlobalThreadId missing in config.");
 
-        string adminUserId = _config["AzureCommunicationServices:AdminUserId"]
+        string adminUserId = config["AzureCommunicationServices:AdminUserId"]
             ?? throw new InvalidOperationException("AdminUserId missing in config.");
 
         // Create a new ACS identity + token for this user session
@@ -85,13 +77,13 @@ public class ChatRoomService  : IChatRoomService
             new[] { CommunicationTokenScope.Chat }
         );
 
-        // 2. Get admin token to add the new user as participant
+        //  Get admin token to add the new user as participant
         var adminToken = await _identityClient.GetTokenAsync(
             new CommunicationUserIdentifier(adminUserId),
             new[] { CommunicationTokenScope.Chat }
         );
 
-        // 3. Use admin client to add new user to the global thread
+        //  Use admin client to add new user to the global thread
         var adminClient = new ChatClient(
             new Uri(_acsEndpoint),
             new CommunicationTokenCredential(adminToken.Value.Token)
@@ -107,13 +99,15 @@ public class ChatRoomService  : IChatRoomService
             };
             await threadClient.AddParticipantsAsync(new[] { participant });
         }
+        // If the user is already a participant in the thread when trying to join , -> when rejoining after a page 
+        // navigation while the ACS session is still active, ACS returns 409 Conflict.
+        // This is expected behavior and safe to ignore
         catch (RequestFailedException ex) when (ex.Status == 409)
         {
-            // 409 = Already a participant, safe to ignore
-            Console.WriteLine($"[AZURE-CHAT]: User already in thread: {ex.Message}");
+            logger.LogWarning("User {Username} is already a participant in thread {ThreadId}", username, globalThreadId);
         }
 
-        // 4. Return token and thread info to frontend
+        //  Return token and thread info to frontend
         return new ChatRoomResponseDto
         {
             AzureThreadId = globalThreadId,
