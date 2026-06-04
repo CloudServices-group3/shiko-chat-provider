@@ -1,6 +1,6 @@
 # Shiko Chat Provider API
 
-Microservice responsible for managing a general live chat. Acts as a bridge between the Next.js frontend and Azure Communication Services (ACS), handling user identity creation and token generation for chat access.
+Microservice responsible for managing a general live chat. Acts as a bridge between the Next.js frontend and Azure Communication Services (ACS), handling user identity creation and token generation for chat access. This service is deployed to Azure and runs as part of the Shiko microservices architecture. 
 
 
 ## 🚀 Features
@@ -20,13 +20,9 @@ Microservice responsible for managing a general live chat. Acts as a bridge betw
 - `Azure.Communication.Identity` – Identity and token management
 
 
-## 🏁 Getting Started
-
-
-This service is deployed to Azure and runs as part of the Shiko microservices architecture. For local development, follow the steps below.
-
-
 ## 🔗 Related Services
 
-- **Shiko Auth API** – Handles authentication and provides the JWT used to authorize chat requests
-- **Shiko Frontend** – Next.js frontend that connects to the chat using the ACS token returned by this API
+
+- **Shiko Auth API** - https://github.com/CloudServices-group3/shiko-auth-api – Handles authentication and provides the JWT used to authorize chat requests
+- **Shiko Frontend** - https://github.com/CloudServices-group3/shiko-frontend – Next.js frontend that connects to the chat using the ACS token returned by this API
+
