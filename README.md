@@ -2,6 +2,7 @@
 
 Microservice responsible for managing a general live chat. Acts as a bridge between the Next.js frontend and Azure Communication Services (ACS), handling user identity creation and token generation for chat access. This service is deployed to Azure and runs as part of the Shiko microservices architecture. 
 
+**API Documentation (Scalar):** [https://azure-chat-webapp-crf4ded2dzf0b5d0.swedencentral-01.azurewebsites.net/scalar](https://azure-chat-webapp-crf4ded2dzf0b5d0.swedencentral-01.azurewebsites.net/scalar)
 
 ## 🚀 Features
 
